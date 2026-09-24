@@ -23,7 +23,6 @@ class TidewaterElement extends HTMLElement {
 		button.addEventListener( 'click', () => {
 			resume.removeAttribute( 'open' );
 			frame.contentWindow?.postMessage( { type: 'pma-resume' }, '*' );
-			frame.focus();
 		} );
 		resume.append( button );
 		frame.addEventListener( 'load', () => {
