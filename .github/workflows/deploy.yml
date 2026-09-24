@@ -26,7 +26,7 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      - run: npm test
+      - run: node test/game-logic.mjs
       - run: npm run build
       - name: Preserve the verified production build
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
