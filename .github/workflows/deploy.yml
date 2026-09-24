@@ -29,7 +29,7 @@ jobs:
       - run: npm test
       - run: npm run build
       - name: Preserve the verified production build
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
         uses: actions/upload-artifact@v7
         with:
           name: verified-dist
@@ -38,7 +38,7 @@ jobs:
           retention-days: 1
 
   deploy:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     needs: verify
     runs-on: ubuntu-latest
     timeout-minutes: 10
