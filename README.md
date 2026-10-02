@@ -5,7 +5,11 @@ sell your catch to Joe at the fish stand, and spend it on better gear at Marta's
 real-time tropical island and ocean: swim the reef, drive the boat out to deep water, and watch a humpback
 breach. It runs directly on WebGPU and WGSL with its own small rendering engine, no framework.
 
-**Play it:** https://dgreenheck.github.io/tidewater/
+**Play it on Mini Arcade:** https://playminiarcade.com/game/tidewater
+
+This is the [Quiet Build fork](https://github.com/quiet-build/tidewater).
+The [upstream project](https://github.com/dgreenheck/tidewater) and its
+[original demo](https://dgreenheck.github.io/tidewater/) remain the source reference.
 
 ![Fishing off the pier at golden hour](docs/screenshot.jpg)
 
@@ -129,7 +133,29 @@ npm run dev      # http://127.0.0.1:5189
 npm run build    # static build in dist/
 ```
 
-Every push to `main` deploys to GitHub Pages through `.github/workflows/deploy.yml`.
+## Mini Arcade release
+
+[`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) verifies pull requests,
+pushes to `main`, and manual Actions runs with Node.js 24: `npm ci`, the game-logic
+and component-contract checks, then the production build. The full `npm test`
+also runs the browser-dependent WebGPU engine smoke test; that test is not part
+of this CI gate. To run only the source checks locally:
+
+```sh
+node test/game-logic.mjs
+node test/component-contract.mjs
+```
+
+After verification, a main-branch push or manual main-branch run publishes the
+same verified `dist/` artifact to **Cloudflare Workers Static Assets**, using the
+`tidewater` Worker configured in [`wrangler.jsonc`](wrangler.jsonc). Deployment
+requires the repository secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`;
+production releases run through GitHub Actions only. This fork does not deploy
+to GitHub Pages.
+
+The Mini Arcade portal loads `public/component.js`, which registers
+`pma-tidewater` and embeds the standalone game in a same-origin iframe with host
+pause/resume support. See [the source and release record](SOURCE_REVIEW.md).
 
 ## Project layout
 
