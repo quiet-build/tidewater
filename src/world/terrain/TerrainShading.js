@@ -1,7 +1,7 @@
 import { Color, SRGBColorSpace } from '../../engine/math/index.js';
 import { ShaderModule } from '../../engine/gpu/Shader.js';
 import { commonModule } from '../../engine/render/wgsl/common.js';
-import { getDetailTexture } from './DetailTextures.js';
+import { getDetailTexture, clearDetailTexture } from './DetailTextures.js';
 
 // Shared WGSL building blocks for the terrain and the scattered rocks (the former TSL helpers).
 //
@@ -294,3 +294,5 @@ export function terrainShadingModule() {
 	return _module;
 
 }
+
+export function clearTerrainShading() { _module = _detailSpec = null; clearDetailTexture(); }

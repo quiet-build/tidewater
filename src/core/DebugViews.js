@@ -1,7 +1,7 @@
 import { Vector3 } from '../engine/math/index.js';
 
 // Named review cameras used to check every change from the same set of angles.
-// window.__view( name ) jumps there; window.__views lists them.
+// app.debugView( name ) jumps there; app.views lists them.
 export const VIEWS = {
 	beach: { p: [ 15, 3.0, - 58 ], yaw: Math.PI, pitch: - 0.08, time: 16.2 },
 	surf: { p: [ 12, 1.7, - 44 ], yaw: Math.PI + 0.25, pitch: - 0.02, time: 16.2 },
@@ -29,8 +29,8 @@ export const VIEWS = {
 
 export function installDebugViews( app ) {
 
-	window.__views = Object.keys( VIEWS );
-	window.__view = ( name ) => {
+	app.views = Object.keys( VIEWS );
+	app.debugView = ( name ) => {
 
 		const v = VIEWS[ name ];
 		if ( ! v ) return 'unknown view';

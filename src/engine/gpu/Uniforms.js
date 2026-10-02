@@ -257,7 +257,9 @@ export class UniformBlock {
 
 	getBuffer() {
 
-		if ( ! this.buffer ) {
+		if ( ! this.buffer || this._device !== GPU.device ) {
+
+			this._device = GPU.device;
 
 			this.buffer = GPU.device.createBuffer( { label: this.label, size: this.byteLength, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST } ); // STORAGE: may be bound read-only when a stage runs out of uniform slots (Shader.js)
 			this._last = new Uint32Array( this.byteLength / 4 );
@@ -274,7 +276,7 @@ export class UniformBlock {
 	// nothing ran in between, see BindingSet.getBindGroup)
 	upload( token ) {
 
-		if ( token !== undefined && token === this._token && this.buffer ) return this.buffer;
+		if ( token !== undefined && token === this._token && this.buffer && this._device === GPU.device ) return this.buffer;
 		this._token = token;
 		const buf = this.getBuffer();
 		this._pack();

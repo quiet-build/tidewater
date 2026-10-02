@@ -1,3 +1,4 @@
+import { assetBase } from '../assets.js';
 import { Group, Mesh, Vector3, Matrix4 } from '../engine/index.js';
 import { prepare, mergePrepared, box, cylinder, sphere, rod, torus, mat4 } from '../world/boat/GeoKit.js';
 import { createPropMaterial, PAT } from './GameMaterials.js';
@@ -48,7 +49,7 @@ export class Chandlery {
 			greeting: 'Line, reels, a bigger hold, diesel. What do you need?',
 			material: this.material,
 			// realistic character (Rocketbox, MIT): the stand-in shows until it has loaded
-			character: { url: ( ( import.meta.env && import.meta.env.BASE_URL ) || '/' ) + 'models/characters/marta.glb', idle: 'idle_neutral_01', talk: 'gestic_talk_neutral_01', greet: 'wave_01' },
+			character: { url: assetBase + 'models/characters/marta.glb', idle: 'idle_neutral_01', talk: 'gestic_talk_neutral_01', greet: 'wave_01' },
 			look: { shirt: 0x8a3b32, trousers: 0x2f3b4a, apron: 0x3d5a4a, hat: 0x2c3a44, hair: 0x3a2c22, skin: 0x7a5236 },
 		} );
 		scene.add( this.vendor.group );

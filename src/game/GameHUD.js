@@ -170,7 +170,7 @@ export class GameHUD {
 		this.game = game;
 		const style = h( 'style' );
 		style.textContent = CSS;
-		document.head.append( style );
+		ui.root.append( style );
 
 		this.purse = h( 'div', 'gm-purse tw-glass', `<span class="gm-money">$0</span><span class="gm-cooler"><span class="gm-cooler-label">Cooler</span><span class="gm-cooler-bar"><span></span></span><span class="gm-cooler-kg">0 / 30 kg</span></span><span class="gm-gauge gm-fuel"><span>Fuel</span><span class="gm-cooler-bar gm-fuel-bar"><span></span></span><b class="gm-fuel-l">40 L</b></span><span class="gm-gauge gm-sonar"><span>Sonar</span><b class="gm-sonar-d">0 m</b><span class="gm-sonar-dots"></span></span>` );
 		this.fuelEl = this.purse.querySelector( '.gm-fuel' );
@@ -468,7 +468,7 @@ function releaseMouse() {
 
 	try {
 
-		if ( document.pointerLockElement && document.exitPointerLock ) document.exitPointerLock();
+		if ( this.ui.scope.pointerLockElement && document.exitPointerLock ) document.exitPointerLock();
 
 	} catch ( e ) { /* ignore */ }
 

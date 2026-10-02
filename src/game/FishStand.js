@@ -1,3 +1,4 @@
+import { assetBase } from '../assets.js';
 import { Group, Mesh, Vector3, BoxGeometry, Matrix4, Quaternion } from '../engine/index.js';
 import { mergeGeometries } from '../engine/geometry/BufferGeometryUtils.js';
 import { prepare, mergePrepared, box, cylinder, sphere, rod, mat4 } from '../world/boat/GeoKit.js';
@@ -57,7 +58,7 @@ export class FishStand {
 			idle: 'Nothing to sell? The grunts are biting off the pier.',
 			material: this.material,
 			// realistic character (Rocketbox, MIT): the stand-in shows until it has loaded
-			character: { url: ( ( import.meta.env && import.meta.env.BASE_URL ) || '/' ) + 'models/characters/joe.glb', idle: 'idle_neutral_01', talk: 'gestic_talk_relaxed_01', greet: 'wave_01' },
+			character: { url: assetBase + 'models/characters/joe.glb', idle: 'idle_neutral_01', talk: 'gestic_talk_relaxed_01', greet: 'wave_01' },
 		} );
 		scene.add( this.vendor.group );
 

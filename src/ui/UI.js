@@ -1865,9 +1865,10 @@ const NAV_KEYS = new Set( [ 'Space', 'Enter', 'NumpadEnter', 'ArrowUp', 'ArrowDo
 
 export class UI {
 
-	constructor( container = document.body ) {
+	constructor( container ) {
 
-		this.container = container || document.body;
+		this.container = container;
+		this.scope = container.getRootNode();
 		this.tabs = new Map();
 		this.activeTab = null;
 		this._controls = new Set();
@@ -1899,7 +1900,7 @@ export class UI {
 		this.releasePointerOnPanel = true;
 
 		// index.html ships a temporary FPS counter; the HUD replaces it.
-		document.getElementById( 'fps' )?.remove();
+		this.scope.querySelector( '#fps' )?.remove();
 
 		this.root = h( 'div', 'tw-root', { 'data-panel': 'closed' } );
 		this._buildHUD();
@@ -2232,7 +2233,7 @@ export class UI {
 
 		}
 
-		window.addEventListener( 'keydown', ( e ) => {
+		this.container.addEventListener( 'keydown', ( e ) => {
 
 			this._activity();
 			this._onKey( e );
@@ -2240,24 +2241,24 @@ export class UI {
 		}, { signal } );
 
 		// any input (mouse-look included) keeps the HUD awake
-		window.addEventListener( 'wheel', () => this._activity(), { passive: true, signal } );
-		document.addEventListener( 'pointermove', ( e ) => {
+		this.container.addEventListener( 'wheel', () => this._activity(), { passive: true, signal } );
+		this.container.addEventListener( 'pointermove', ( e ) => {
 
-			const locked = !! document.pointerLockElement;
+			const locked = !! this.scope.pointerLockElement;
 			this._overUI = ! locked && !! e.target?.closest?.( '.tw-interactive' );
 			this._activity();
 			if ( this._photo && ! locked ) this._pokePhotoHint();
 
 		}, { passive: true, signal } );
 
-		document.addEventListener( 'pointerdown', ( e ) => {
+		this.container.addEventListener( 'pointerdown', ( e ) => {
 
 			const inUI = !! e.target?.closest?.( '.tw-interactive' );
-			this._overUI = inUI && ! document.pointerLockElement;
+			this._overUI = inUI && ! this.scope.pointerLockElement;
 			if ( this._menu && ! this._menu.contains( e.target ) && ! this._menuAnchor?.contains( e.target ) ) this._closeMenu();
 			if ( ! inUI ) {
 
-				const a = document.activeElement;
+				const a = this.scope.activeElement;
 				if ( a && a !== document.body && this.root.contains( a ) ) a.blur();
 
 			}
@@ -2266,7 +2267,7 @@ export class UI {
 
 		}, { capture: true, signal } );
 
-		document.addEventListener( 'pointerout', ( e ) => {
+		this.container.addEventListener( 'pointerout', ( e ) => {
 
 			if ( ! e.relatedTarget ) this._overUI = false;
 
@@ -2274,14 +2275,14 @@ export class UI {
 
 		document.addEventListener( 'pointerlockchange', () => {
 
-			const locked = !! document.pointerLockElement;
+			const locked = !! this.scope.pointerLockElement;
 			this.root.classList.toggle( 'is-locked', locked );
 			if ( locked ) {
 
 				this._overUI = false;
 				this._closeMenu();
 				this._hideTip();
-				const a = document.activeElement;
+				const a = this.scope.activeElement;
 				if ( a && this.root.contains( a ) ) a.blur();
 
 			} else {
@@ -2433,7 +2434,7 @@ export class UI {
 		const t = e.target.closest?.( '[data-tip]' );
 		if ( t === this._tipT ) return;
 		this._hideTip();
-		if ( ! t || this._drag || document.pointerLockElement ) return;
+		if ( ! t || this._drag || this.scope.pointerLockElement ) return;
 		this._tipT = t;
 		this._tipTimer = setTimeout( () => this._showTip( t ), t.closest( '.tw-rail' ) ? 220 : 520 );
 
@@ -2452,6 +2453,7 @@ export class UI {
 		tip.innerHTML = esc( t.dataset.tip ) + ( t.dataset.tipHint ? `<small>${ esc( t.dataset.tipHint ) }</small>` : '' );
 		tip.classList.add( 'is-on' );
 		const r = t.getBoundingClientRect(), tr = tip.getBoundingClientRect();
+		const bounds = this.container.getBoundingClientRect();
 		const left = t.dataset.tipSide === 'left';
 		let x, y;
 		if ( left ) {
@@ -2463,12 +2465,12 @@ export class UI {
 
 			x = r.left + r.width / 2 - tr.width / 2;
 			y = r.top - tr.height - 8;
-			if ( y < 8 ) y = r.bottom + 8;
+			if ( y < bounds.top + 8 ) y = r.bottom + 8;
 
 		}
 
-		x = clamp( x, 8, window.innerWidth - tr.width - 8 );
-		y = clamp( y, 8, window.innerHeight - tr.height - 8 );
+		x = clamp( x - bounds.left, 8, bounds.width - tr.width - 8 );
+		y = clamp( y - bounds.top, 8, bounds.height - tr.height - 8 );
 		tip.style.transform = `translate(${ Math.round( x ) }px, ${ Math.round( y ) }px)`;
 
 	}
@@ -2503,7 +2505,7 @@ export class UI {
 		menu.addEventListener( 'keydown', ( e ) => {
 
 			const items = [ ...menu.children ];
-			let j = items.indexOf( document.activeElement );
+			let j = items.indexOf( this.scope.activeElement );
 			switch ( e.key ) {
 
 				case 'ArrowDown': j = Math.min( items.length - 1, j + 1 ); break;
@@ -2528,11 +2530,12 @@ export class UI {
 		this.root.append( menu );
 
 		const r = anchor.getBoundingClientRect();
+		const bounds = this.container.getBoundingClientRect();
 		menu.style.minWidth = `${ Math.round( r.width ) }px`;
 		const mh = menu.offsetHeight, mw = menu.offsetWidth;
-		let top = r.bottom + 6;
-		if ( top + mh > window.innerHeight - 8 ) top = Math.max( 8, r.top - 6 - mh );
-		const left = clamp( r.right - mw, 8, window.innerWidth - mw - 8 );
+		let top = r.bottom - bounds.top + 6;
+		if ( top + mh > bounds.height - 8 ) top = Math.max( 8, r.top - bounds.top - 6 - mh );
+		const left = clamp( r.right - bounds.left - mw, 8, bounds.width - mw - 8 );
 		menu.style.top = `${ Math.round( top ) }px`;
 		menu.style.left = `${ Math.round( left ) }px`;
 		anchor.setAttribute( 'aria-expanded', 'true' );
@@ -2671,11 +2674,11 @@ export class UI {
 		if ( open ) {
 
 			this.activeTab?.refresh();
-			if ( this.releasePointerOnPanel && document.pointerLockElement ) document.exitPointerLock?.();
+			if ( this.releasePointerOnPanel && this.scope.pointerLockElement ) document.exitPointerLock?.();
 
 		} else {
 
-			const a = document.activeElement;
+			const a = this.scope.activeElement;
 			if ( a && this.panel.contains( a ) ) a.blur();
 
 		}
@@ -3086,12 +3089,12 @@ export class UI {
 			el.hidden = false;
 			void el.offsetWidth;
 			el.classList.add( 'is-on' );
-			if ( ! document.pointerLockElement ) el.querySelector( '.tw-help-close' )?.focus( { preventScroll: true } );
+			if ( ! this.scope.pointerLockElement ) el.querySelector( '.tw-help-close' )?.focus( { preventScroll: true } );
 
 		} else {
 
 			el.classList.remove( 'is-on' );
-			const a = document.activeElement;
+			const a = this.scope.activeElement;
 			if ( a && el.contains( a ) ) a.blur();
 			this._helpT = setTimeout( () => {
 
@@ -3124,7 +3127,7 @@ export class UI {
 			this.toggleHelp( false );
 			this._closeMenu();
 			this._hideTip();
-			const a = document.activeElement;
+			const a = this.scope.activeElement;
 			if ( a && this.root.contains( a ) ) a.blur();
 			this._pokePhotoHint();
 
@@ -3182,12 +3185,12 @@ export class UI {
 				}
 
 				el.removeEventListener( 'click', go );
-				window.removeEventListener( 'keydown', go, true );
+				this.container.removeEventListener( 'keydown', go, true );
 				this._start = false;
 				this._startPromise = null;
 				this.root.classList.remove( 'is-starting' );
 				el.classList.remove( 'is-on' );
-				const a = document.activeElement;
+				const a = this.scope.activeElement;
 				if ( a && el.contains( a ) ) a.blur();
 				setTimeout( () => {
 
@@ -3202,7 +3205,7 @@ export class UI {
 			};
 
 			el.addEventListener( 'click', go );
-			window.addEventListener( 'keydown', go, true );
+			this.container.addEventListener( 'keydown', go, { capture: true, signal: this._ac.signal } );
 
 		} );
 
@@ -3219,7 +3222,7 @@ export class UI {
 
 	setLoading( progress01, status, until ) {
 
-		const L = document.getElementById( 'loader' );
+		const L = this.scope.querySelector( '#loader' );
 		if ( ! L ) return;
 		const ld = this._loaderState();
 		if ( typeof progress01 === 'number' && isFinite( progress01 ) ) {
@@ -3258,7 +3261,7 @@ export class UI {
 
 	setLoadingError( message ) {
 
-		const L = document.getElementById( 'loader' );
+		const L = this.scope.querySelector( '#loader' );
 		if ( ! L ) return;
 		const ld = this._loaderState();
 		L.classList.add( 'tw-error' );
@@ -3272,7 +3275,7 @@ export class UI {
 	_loaderState() {
 
 		if ( this._ld ) return this._ld;
-		const L = document.getElementById( 'loader' );
+		const L = this.scope.querySelector( '#loader' );
 		const q = ( sel ) => L && L.querySelector( sel );
 		const ld = this._ld = {
 			from: 0, until: 0.05, shown: 0, stageT: performance.now(), tau: 6000, detail: - 1, status: '',
@@ -3319,7 +3322,7 @@ export class UI {
 	// Fades the loader out; the returned promise resolves once it is gone.
 	hideLoader() {
 
-		const L = document.getElementById( 'loader' );
+		const L = this.scope.querySelector( '#loader' );
 		if ( ! L ) return Promise.resolve();
 		if ( this._loaderGone ) return this._loaderGone;
 		this.setLoading( 1, 'Ready' );
@@ -3349,7 +3352,7 @@ export class UI {
 	get isPointerOverUI() {
 
 		if ( this._drag > 0 || this._start || this._help ) return true;
-		if ( document.pointerLockElement ) return false;
+		if ( this.scope.pointerLockElement ) return false;
 		return this._overUI;
 
 	}
@@ -3357,6 +3360,10 @@ export class UI {
 	dispose() {
 
 		clearInterval( this._timer );
+		clearTimeout( this._tipTimer );
+		clearTimeout( this._photoT );
+		clearTimeout( this._helpT );
+		if ( this._ld ) { this._ld.stopped = true; cancelAnimationFrame( this._ld.raf ); }
 		this._ac.abort();
 		for ( const t of this._toasts ) clearTimeout( t.timer );
 		this._closeMenu();

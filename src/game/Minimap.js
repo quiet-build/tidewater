@@ -103,7 +103,7 @@ export class Minimap {
 		this.game = game;
 		const style = h( 'style' );
 		style.textContent = CSS;
-		document.head.append( style );
+		parent.append( style );
 
 		this.el = h( 'div', 'gm-map tw-glass', `<div class="gm-map-view"><canvas width="${ N }" height="${ N }"></canvas><div class="gm-map-vig"></div>
 			<div class="gm-map-marks"></div>

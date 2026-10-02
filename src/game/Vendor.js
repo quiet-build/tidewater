@@ -36,7 +36,7 @@ export class Vendor {
 		this.character = null;
 		this.talking = false;
 		this._near = false;
-		if ( character ) this.loadCharacter( character.url, character ).catch( ( e ) => console.warn( 'Vendor: character failed to load', e ) );
+		if ( character ) this.ready = this.loadCharacter( character.url, character ).catch( ( e ) => console.warn( 'Vendor: character failed to load', e ) );
 
 	}
 

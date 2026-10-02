@@ -1,3 +1,4 @@
+import { assetBase } from '../assets.js';
 import { Vector2, Vector3, MathUtils } from '../engine/index.js';
 import { GPU, ShaderModule, UniformBlock, ComputeKernel, Texture, G, FrameUniforms } from '../engine/webgpu.js';
 import { commonModule } from '../engine/render/wgsl/common.js';
@@ -444,7 +445,7 @@ export class SkyProClouds {
 
 	async _loadNoise() {
 
-		const base = ( import.meta.env && import.meta.env.BASE_URL ) || '/';
+		const base = assetBase;
 		const get = async ( name ) => {
 
 			const r = await fetch( base + 'clouds/' + name );

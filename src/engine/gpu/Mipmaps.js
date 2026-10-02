@@ -86,3 +86,5 @@ export function generateMipmaps( texture, encoder = GPU.getEncoder() ) {
 	}
 
 }
+
+export function clearMipmapCache() { _pipelines.clear(); _module = null; }

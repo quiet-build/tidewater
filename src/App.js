@@ -3,6 +3,12 @@ import { GPU } from './engine/gpu/GPU.js';
 import { SunShadows } from './engine/render/Shadows.js';
 import { FrameUniforms } from './engine/render/Frame.js';
 
+import { clearShaderCache } from './engine/gpu/Shader.js';
+import { SceneLighting, setShadowMap } from './engine/render/wgsl/lighting.js';
+import { clearStallAssets } from './game/StallKit.js';
+import { clearTerrainShading } from './world/terrain/TerrainShading.js';
+import { clearSurfFoam } from './ocean/SurfFoam.js';
+import { clearMipmapCache } from './engine/gpu/Mipmaps.js';
 import { Engine } from './core/Engine.js';
 import { Input } from './core/Input.js';
 import { CDLOD } from './core/CDLOD.js';
@@ -41,7 +47,7 @@ import { ShoreSim } from './ocean/ShoreSim.js';
 import { Caustics } from './ocean/Caustics.js';
 import { installUnderwaterLighting } from './ocean/UnderwaterLighting.js';
 import { RefractionPass } from './ocean/RefractionPass.js';
-import { installGroundBounce } from './materials/GroundBounce.js';
+import { installGroundBounce, GroundBounce } from './materials/GroundBounce.js';
 import { LocalLights, addVillageLights, addBoatLights } from './materials/LocalLights.js';
 import { installContactShadows, ContactShadows } from './materials/ContactShadows.js';
 import { WaterQuery } from './ocean/WaterQuery.js';
@@ -71,7 +77,11 @@ const _up = new Vector3( 0, 1, 0 );
 
 export class App {
 
-	constructor() {
+	constructor( container, ui, signal ) {
+
+		this.container = container;
+		this.view = ui;
+		this.signal = signal;
 
 		this.settings = {
 			timeOfDay: 16.2,
@@ -90,12 +100,13 @@ export class App {
 		// report a stage, then let the page paint it before the (synchronous) stage work starts
 		const progress = async ( p, text, until ) => {
 
+			this.signal?.throwIfAborted();
 			onProgress( p, text, until );
 			if ( typeof requestAnimationFrame === 'function' ) await new Promise( ( r ) => requestAnimationFrame( () => setTimeout( r, 0 ) ) );
 
 		};
 		await progress( 0.02, 'Starting WebGPU…' );
-		const engine = this.engine = new Engine( document.getElementById( 'app' ) );
+		const engine = this.engine = new Engine( this.container );
 		await engine.init();
 		// systems take `renderer` first as in the three.js version: it is the Engine now (GPU access is global)
 		const renderer = engine;
@@ -342,7 +353,7 @@ fn terrainWetness( xz: vec2f, h: f32 ) -> vec2f {
 
 		// ---------------------------------------------------------------- audio
 		// recorded field recordings (public/audio, credits in public/audio/CREDITS.md); ?noAudio turns it off
-		this.audio = qs.has( 'noAudio' ) ? null : new SoundScape();
+		this.audio = qs.has( 'noAudio' ) ? null : new SoundScape( { app: this } );
 		this.player.audio = this.audio;
 		// the fishing game (rod, bites, catch, cooler, fish stand)
 		this.game = new Game( this );
@@ -359,7 +370,7 @@ fn terrainWetness( xz: vec2f, h: f32 ) -> vec2f {
 		this.boatCtl.onSlam = ( s ) => this.audio && this.audio.hullSlap( s );
 		engine.domElement.addEventListener( 'click', () => {
 
-			if ( window.__ui && window.__ui.isPointerOverUI ) return;
+			if ( this.view?.isPointerOverUI ) return;
 			this.input.requestLock();
 			if ( this.audio ) this.audio.resume();
 
@@ -372,7 +383,6 @@ fn terrainWetness( xz: vec2f, h: f32 ) -> vec2f {
 
 		this.updateSun();
 		installDebugViews( this );
-		window.__app = this;
 		this.gpu = GPU; // console / test access
 
 		// ---- compile pipelines asynchronously (keeps the page responsive), then prime a few
@@ -387,6 +397,29 @@ fn terrainWetness( xz: vec2f, h: f32 ) -> vec2f {
 			await GPU.queue.onSubmittedWorkDone();
 
 		}
+
+	}
+
+	async dispose() {
+
+		this.engine?.stop();
+		this.input?.dispose();
+		this.audio?.dispose();
+		await Promise.allSettled( [ this.debris?.scanned?.promise, this.game?.stand?.ready, this.game?.chandlery?.ready,
+			this.game?.stand?.vendor?.ready, this.game?.chandlery?.vendor?.ready ] );
+		await GPU.pipelinesReady();
+		this.engine?.dispose();
+		ContactShadows.skipRoots.clear();
+		ContactShadows.module = ContactShadows.depthTexture = null;
+		GroundBounce.module = null;
+		SceneLighting.hooks = {};
+		setShadowMap( null );
+		clearStallAssets();
+		clearShaderCache();
+		clearMipmapCache();
+		clearTerrainShading();
+		clearSurfFoam();
+		GPU.dispose();
 
 	}
 
@@ -566,7 +599,7 @@ fn terrainWetness( xz: vec2f, h: f32 ) -> vec2f {
 
 	updateFPS( dt ) {
 
-		const f = this._fps || ( this._fps = { el: document.getElementById( 'fps' ), acc: 0, n: 0, worst: 0 } );
+		const f = this._fps || ( this._fps = { el: this.container.getRootNode().querySelector( '#fps' ), acc: 0, n: 0, worst: 0 } );
 		f.acc += dt;
 		f.n ++;
 		f.worst = Math.max( f.worst, dt );

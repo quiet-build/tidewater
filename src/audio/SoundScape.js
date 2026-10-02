@@ -1,3 +1,4 @@
+import { assetBase } from '../assets.js';
 // Sample-based sound for the island: real field recordings only (public/audio, sources and licences in
 // public/audio/CREDITS.md). Nothing is synthesised. Files are fetched and decoded after the first user
 // gesture (resume()); boat, underwater, pier and night sounds load the first time they become audible.
@@ -11,7 +12,7 @@
 // Birds: songbirds and doves sing short bouts from random perches in the island's trees near the
 // listener (none on the open sea; more inland), by time of day - a dawn chorus (plus a diffuse chorus
 // bed), a midday lull, sparse at dusk, silent at night. Gulls and terns call from the wildlife's real
-// birds near the listener. The humpback (window.__app.whale): its song at the whale (clear underwater,
+// birds near the listener. The humpback (the app.whale): its song at the whale (clear underwater,
 // faint and dull from above), and one-shots on its real events - blow, breach, re-entry, fluke-up dive -
 // all only within 100 m of it.
 //
@@ -128,8 +129,10 @@ export class SoundScape {
 
 	// Does not touch Web Audio: the context is created on the first resume() (autoplay policy).
 	// shore (optional): { shore: ShoreWaves, field: shore field { res, data }, terrain: TerrainData }; found
-	// on window.__app when not given (see attachShore()).
-	constructor( { baseUrl = ( ( import.meta.env && import.meta.env.BASE_URL ) || '/' ) + 'audio/', shore = null } = {} ) {
+	// on the app when not given (see attachShore()).
+	constructor( { app = null, baseUrl = assetBase + 'audio/', shore = null } = {} ) {
+
+		this.app = app;
 
 		this.baseUrl = baseUrl;
 		this.ctx = null;
@@ -170,7 +173,7 @@ export class SoundScape {
 
 	// ------------------------------------------------------------------ public API
 
-	// Optional: the game's shore waves (else taken from window.__app on first use).
+	// Optional: the game's shore waves (else taken from the app on first use).
 	attachShore( { shore, field, terrain } ) {
 
 		this._shore = shore && field && terrain ? { shore, field, terrain } : null;
@@ -721,7 +724,7 @@ export class SoundScape {
 	_shoreSrc() {
 
 		if ( this._shore ) return this._shore;
-		const app = globalThis.__app;
+		const app = this.app;
 		if ( app && app.shore && app.shoreField && app.shoreField.data && app.terrainData ) {
 
 			this._shore = { shore: app.shore, field: app.shoreField, terrain: app.terrainData };
@@ -1145,10 +1148,10 @@ export class SoundScape {
 
 	}
 
-	// the wildlife's flying / perched sea birds (window.__app.wildlife.birds.agents), if any
+	// the wildlife's flying / perched sea birds (the app.wildlife.birds.agents), if any
 	_flock() {
 
-		const app = globalThis.__app, w = app && app.wildlife, b = w && w.birds;
+		const app = this.app, w = app && app.wildlife, b = w && w.birds;
 		return b && Array.isArray( b.agents ) && b.agents.length ? b.agents : null;
 
 	}
@@ -1190,7 +1193,7 @@ export class SoundScape {
 	_hour() {
 
 		if ( this.env.hour !== null ) return this.env.hour;
-		const app = globalThis.__app, h = app && app.settings && app.settings.timeOfDay;
+		const app = this.app, h = app && app.settings && app.settings.timeOfDay;
 		return typeof h === 'number' && Number.isFinite( h ) ? ( ( h % 24 ) + 24 ) % 24 : null;
 
 	}
@@ -1212,7 +1215,7 @@ export class SoundScape {
 	// 3-12 m above the ground; null when there is no land near (out at sea)
 	_perch() {
 
-		const e = this.env, app = globalThis.__app;
+		const e = this.env, app = this.app;
 		const terrain = ( this._shore && this._shore.terrain ) || ( app && app.terrainData );
 		for ( let k = 0; k < 8; k ++ ) {
 
@@ -1319,11 +1322,11 @@ export class SoundScape {
 
 	}
 
-	// ------------------------------------------------------------------ the humpback (window.__app.whale)
+	// ------------------------------------------------------------------ the humpback (the app.whale)
 
 	_whale( now, dt ) {
 
-		const e = this.env, s = this._wh, app = globalThis.__app;
+		const e = this.env, s = this._wh, app = this.app;
 		const w = app && app.whale, b = w && w.ready && w.brain;
 		if ( ! b || ! b.position ) {
 

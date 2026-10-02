@@ -61,7 +61,7 @@ export const GPU = {
 		this.device = device;
 		this.queue = device.queue;
 		this.limits = device.limits;
-		device.lost.then( ( info ) => console.error( 'WebGPU device lost:', info.message ) );
+		device.lost.then( ( info ) => { if ( info.reason !== 'destroyed' ) console.error( 'WebGPU device lost:', info.message ); } );
 		device.addEventListener && device.addEventListener( 'uncapturederror', ( e ) => console.error( 'WebGPU:', e.error.message.split( '\n' ).slice( 0, 6 ).join( '\n' ) ) );
 
 		if ( canvas && ! headless ) {
@@ -75,6 +75,18 @@ export const GPU = {
 
 		this._createSamplers();
 		return this;
+
+	},
+
+	dispose() {
+
+		this.context?.unconfigure();
+		this.device?.destroy();
+		this.device = this.queue = this.context = this.canvas = this.encoder = this.samplers = null;
+		this._submitHooks = [];
+		this._pending.clear();
+		this.syncCompiles = [];
+		this.frame = 0;
 
 	},
 

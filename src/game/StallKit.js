@@ -1,8 +1,10 @@
+import { assetBase } from '../assets.js';
 import {
 	BufferGeometry, Float32BufferAttribute, Uint32BufferAttribute, Matrix4, Matrix3, Vector3, Quaternion, Euler,
 	CylinderGeometry, TorusGeometry, SphereGeometry, LatheGeometry, Vector2,
 } from '../engine/index.js';
 import { Texture } from '../engine/gpu/Texture.js';
+import { GPU } from '../engine/gpu/GPU.js';
 import { generateMipmaps } from '../engine/gpu/Mipmaps.js';
 import { commonModule } from '../engine/render/wgsl/common.js';
 import { ShaderModule } from '../engine/gpu/Shader.js';
@@ -41,7 +43,7 @@ export const ATLAS = {
 // corrugation measured from the iron's normal map: 16 ribs per 1.8 m tile, height phase 1.029 rad
 const RIBS = 16, RIB_PHASE = 1.029, RIB_AMP = 0.011;
 
-const BASE = ( ( import.meta.env && import.meta.env.BASE_URL ) || '/' ) + 'models/props/';
+const BASE = assetBase + 'models/props/';
 
 async function bytes( url ) {
 
@@ -77,8 +79,10 @@ function arrayTexture( label, imgs, srgb ) {
 }
 
 let _assets = null;
+let _device = null;
 export function loadStallAssets() {
 
+	if ( _device !== GPU.device ) { _assets = null; _device = GPU.device; }
 	return _assets || ( _assets = _load() );
 
 }
@@ -725,3 +729,5 @@ export const Shapes = {
 	sphere: ( r, ws = 14, hs = 10 ) => new SphereGeometry( r, ws, hs ),
 	lathe: ( pts, seg = 16 ) => new LatheGeometry( pts.map( ( [ x, y ] ) => new Vector2( x, y ) ), seg ),
 };
+
+export function clearStallAssets() { _assets = _device = null; }

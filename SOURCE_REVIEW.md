@@ -18,21 +18,44 @@ reference was removed.
 
 ## Mini Arcade adaptation
 
-The standalone game remains intact. `public/component.js` adds the
-`pma-tidewater` host contract and uses a same-origin iframe because Tidewater is
-a full-document WebGPU game with Pointer Lock and global UI. `src/main.js` adds
-only pause/resume messages for host lifecycle handling. The fork publishes the
-verified static build through GitHub Actions to Cloudflare Workers Static Assets.
+Standalone and portal mount the same `src/component.js` native Web Component.
+The complete original WebGPU engine, gameplay and UI render directly in its
+Shadow DOM. There is no iframe, postMessage bridge or separate full-page boot.
+Input belongs to the canvas; UI queries, pointer lock and layout use the game
+root. ResizeObserver follows the container. Disconnect stops input/audio/RAF,
+waits for in-flight asset jobs, destroys the GPU device, and clears device-bound
+shader, uniform and shared texture caches before a remount.
+
+`src/assets.js` resolves resources against the module, independent of the host
+origin. The Vite output keeps JavaScript at the distribution root. `_headers`
+grants CORS for the complete runtime, including models, clouds and audio.
+The original Google Fonts stylesheet is owned by the mounted component.
+
+Main-site saves are new origin-local saves, as approved by the user; original
+Worker-domain storage is neither imported nor deleted. The Worker standalone
+page remains usable at the old origin with those saves.
 
 ## Verification
 
 - `npm test`: game logic, component contract and local WebGPU engine smoke pass.
 - `npm run build`: production build passes.
-- `npx wrangler deploy --dry-run`: 148 static assets accepted.
-- Live component entry returns JavaScript with CORS and registers
-  `pma-tidewater`.
-- Mini Arcade local production build loads the live component and iframe, then
-  reaches `Ready to play`; pause/resume is exercised with real browser input.
+- `test/component.html`: real removal/remount and resize to 450px passed; the
+  remounted canvas accepted R input and retained no WebGPU validation errors.
+- Real browser input on the local production host: start, canvas clicks, W/R,
+  outside pause, Resume, and returning to the canvas no longer repeat Resume.
+- `pma-ready` means the loading UI is mounted; shader compilation continues with
+  visible progress. Playability is checked separately using Click to explore.
 
 Headless Chromium does not establish playable WebGPU rendering quality. The
 standalone game was separately opened for human local play before publication.
+
+## Native component source review (2026-10-03)
+
+Player problem: clicking the iframe canvas blurs the portal window and repeatedly
+triggers host pause. Reviewed local `quiet-build/voxel-garden` revision `4db6494`,
+`src/component.tsx`: a Shadow DOM mount, composed readiness event, pause method and
+disconnect cleanup. Adapt that lifecycle pattern to Tidewater's existing custom
+WebGPU engine; no engine or asset replacement. Standalone and portal will mount
+the same component. User approved fresh main-site saves; old-domain saves stay
+on their original origin without import or deletion. Acceptance: real canvas
+start/movement, outside pause/resume, scoped controls, resize/fullscreen and remount.

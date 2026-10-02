@@ -28,9 +28,10 @@ export class Engine {
 		await GPU.init( { canvas } );
 		this.meshRenderer = new MeshRenderer();
 		this.meshRenderer.syncPipelines = false; // compile in the background (App.precompile waits for them)
-		this.camera = new PerspectiveCamera( 62, window.innerWidth / window.innerHeight, 0.06, 60000 );
+		this.camera = new PerspectiveCamera( 62, 1, 0.06, 60000 );
 		this.scene = new Scene();
-		window.addEventListener( 'resize', () => this.resize() );
+		this.resizeObserver = new ResizeObserver( () => this.resize() );
+		this.resizeObserver.observe( this.container );
 		this.resize();
 
 	}
@@ -57,7 +58,7 @@ export class Engine {
 
 	resize() {
 
-		const w = window.innerWidth, h = window.innerHeight;
+		const w = Math.max( 1, this.container.clientWidth ), h = Math.max( 1, this.container.clientHeight );
 		const dpr = this.renderScale;
 		this.canvas.width = Math.max( 1, Math.floor( w * dpr ) );
 		this.canvas.height = Math.max( 1, Math.floor( h * dpr ) );
@@ -79,6 +80,9 @@ export class Engine {
 
 	start( update ) {
 
+		this.stop();
+		this.clock.reset();
+
 		const loop = ( t ) => {
 
 			this.clock.update( t );
@@ -91,6 +95,15 @@ export class Engine {
 		};
 
 		this._raf = requestAnimationFrame( loop );
+
+	}
+
+	dispose() {
+
+		this.stop();
+		this.resizeObserver?.disconnect();
+		this.clock.dispose();
+		this.canvas?.remove();
 
 	}
 

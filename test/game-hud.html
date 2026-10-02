@@ -9,11 +9,17 @@
 <script type="module">
 // Dev page: the fishing game's HUD in every state, over a flat sky / sea backdrop.
 // ?view=fight | inv | stand | shop | cast | bite | catch | record | newspecies | full
-import '../src/ui/ui.css';
+import styles from '../src/ui/ui.css?inline';
 import { GameHUD } from '../src/game/GameHUD.js';
 import { GameState } from '../src/game/GameState.js';
 
 const view = new URLSearchParams( location.search ).get( 'view' ) || 'fight';
+const host = document.createElement( 'div' );
+document.body.append( host );
+const scope = host.attachShadow( { mode: 'open' } );
+const style = document.createElement( 'style' );
+style.textContent = styles;
+scope.append( style );
 const root = document.createElement( 'div' );
 root.className = 'tw-root';
 const hud = document.createElement( 'div' );
@@ -22,8 +28,8 @@ const toasts = document.createElement( 'div' );
 toasts.className = 'tw-toasts';
 hud.append( toasts );
 root.append( hud );
-document.body.append( root );
-const ui = { root, hud, toast( t ) { const e = document.createElement( 'div' ); e.className = 'tw-toast tw-glass is-in'; e.textContent = t; toasts.append( e ); } };
+scope.append( root );
+const ui = { root, hud, scope, toast( t ) { const e = document.createElement( 'div' ); e.className = 'tw-toast tw-glass is-in'; e.textContent = t; toasts.append( e ); } };
 const state = new GameState( null );
 state.money = 184;
 state.addFish( 'yellowtail', 1.31, 9 );

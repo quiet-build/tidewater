@@ -230,3 +230,5 @@ export function getDetailTexture() {
 	return tex;
 
 }
+
+export function clearDetailTexture() { cached = null; }

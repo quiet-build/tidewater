@@ -1,3 +1,4 @@
+import { assetBase } from '../../assets.js';
 import {
 	Vector3, Quaternion, Euler, Matrix4, Frustum, Sphere, BufferGeometry, Float32BufferAttribute, Uint16BufferAttribute,
 	Uint32BufferAttribute, InstancedBufferAttribute, InstancedMesh, DynamicDrawUsage,
@@ -27,7 +28,7 @@ export const SCAN = { TRUNK: 0, BRANCH_A: 1, BRANCH_B: 2, SHELL: 3 };
 export const SCAN_SIZE = [ [ 1.994, 0.306, 0.268 ], [ 0.526, 0.287, 0.201 ], [ 0.439, 0.255, 0.227 ], [ 0.139, 0.047, 0.075 ] ];
 const LOD_DIST = [ 22, 70, 260 ]; // m (+ 6 x instance size): LOD0 | LOD1 | LOD2 | faded out
 const BAND = 0.12; // cross-fade band (Bayer screen-door, see LODFade), share of the switch distance
-const BASE = ( ( import.meta.env && import.meta.env.BASE_URL ) || '/' ) + 'models/debris/';
+const BASE = assetBase + 'models/debris/';
 
 // bytes of a file (fetch relative to the page). The headless test runner may provide a reader.
 async function loadBytes( url ) {

@@ -1,0 +1,30 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Tidewater native lifecycle check</title>
+<style>body{margin:16px;font:16px system-ui;background:#eee}#mount{width:800px;max-width:100%;height:650px}button{margin:8px}</style>
+<button id="mount-game">Mount game</button><button id="remove-game">Remove game</button><button id="resize-game">Resize game</button>
+<p id="status" role="status">Removed</p><pre id="errors"></pre><div id="mount"></div>
+<script type="module">
+import '../src/component.js';
+const error = console.error;
+let errors = 0;
+console.error = (...args) => { if (errors++ < 6) document.querySelector('#errors').textContent += args.join(' ') + '\n'; error(...args); };
+const mount = document.querySelector('#mount');
+const status = document.querySelector('#status');
+let game;
+document.querySelector('#mount-game').onclick = () => {
+  if (game) return;
+  game = document.createElement('pma-tidewater');
+  game.addEventListener('pma-ready', () => status.textContent = 'Native loading screen mounted');
+  game.addEventListener('pma-error', () => status.textContent = 'Game failed');
+  mount.append(game);
+};
+document.querySelector('#remove-game').onclick = async () => {
+  if (!game) return;
+  game.remove(); game = null;
+  status.textContent = 'Removed — mount again to verify a new WebGPU device';
+};
+document.querySelector('#resize-game').onclick = () => {
+  mount.style.width = mount.style.width === '450px' ? '800px' : '450px';
+};
+</script>

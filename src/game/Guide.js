@@ -138,7 +138,7 @@ export class Guide {
 		this.minimap = minimap;
 		const style = h( 'style' );
 		style.textContent = CSS;
-		document.head.append( style );
+		ui.root.append( style );
 
 		this.seen = this._load();
 		this.el = h( 'div', 'gm-guide tw-interactive', `<div class="gm-guide-card tw-glass" role="dialog" aria-modal="true" aria-live="polite">
@@ -200,8 +200,8 @@ export class Guide {
 
 		};
 
-		window.addEventListener( 'keydown', this._onKey, true );
-		window.addEventListener( 'mousedown', this._onDown, true );
+		ui.container.addEventListener( 'keydown', this._onKey, { capture: true, signal: ui._ac.signal } );
+		ui.container.addEventListener( 'mousedown', this._onDown, { capture: true, signal: ui._ac.signal } );
 
 	}
 

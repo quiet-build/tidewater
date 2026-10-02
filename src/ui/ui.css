@@ -5,8 +5,8 @@
    Every metric scales with --tw-u (≈1px at 720p, 1.25px at 1440p).
    ========================================================================== */
 
-:root {
-	--tw-u: clamp(1px, calc(0.7px + 0.04vmin), 1.25px);
+:host {
+	--tw-u: clamp(1px, calc(0.7px + 0.04cqmin), 1.25px);
 
 	--tw-aqua: #5fe3d4;
 	--tw-aqua-rgb: 95, 227, 212;
@@ -51,8 +51,10 @@
 
 /* ── page ──────────────────────────────────────────────────────────────── */
 
-html,
-body {
+.tidewater-container {
+	position: relative;
+	container-type: size;
+	contain: layout paint;
 	margin: 0;
 	padding: 0;
 	width: 100%;
@@ -62,7 +64,7 @@ body {
 }
 
 #app {
-	position: fixed;
+	position: absolute;
 	inset: 0;
 }
 
@@ -79,7 +81,7 @@ body {
    is blocked compiling pipelines. */
 
 #loader {
-	position: fixed;
+	position: absolute;
 	inset: 0;
 	z-index: 1000;
 	overflow: hidden;
@@ -133,19 +135,19 @@ body {
 
 .loader-inner {
 	position: absolute;
-	left: clamp(20px, 6vw, 112px);
-	right: clamp(20px, 6vw, 112px);
-	bottom: clamp(24px, 7vh, 96px);
+	left: clamp(20px, 6cqw, 112px);
+	right: clamp(20px, 6cqw, 112px);
+	bottom: clamp(24px, 7cqh, 96px);
 	display: flex;
 	flex-direction: column;
-	gap: clamp(20px, 3.2vh, 40px);
+	gap: clamp(20px, 3.2cqh, 40px);
 	max-width: 1320px;
 	container-type: inline-size;
 }
 
 .loader-kicker {
 	margin: 0 0 calc(10 * var(--tw-u));
-	font-size: clamp(10px, 1vw, 13px);
+	font-size: clamp(10px, 1cqw, 13px);
 	font-weight: 600;
 	letter-spacing: 0.34em;
 	text-transform: uppercase;
@@ -171,7 +173,7 @@ body {
 .loader-tagline {
 	margin: calc(12 * var(--tw-u)) 0 0;
 	max-width: 30em;
-	font-size: clamp(13px, 1.25vw, 16px);
+	font-size: clamp(13px, 1.25cqw, 16px);
 	line-height: 1.5;
 	color: var(--tw-ink-2);
 	text-shadow: 0 1px 10px rgba(0, 0, 0, 0.7);
@@ -190,7 +192,7 @@ body {
 	align-items: baseline;
 	justify-content: space-between;
 	gap: var(--tw-3);
-	font-size: clamp(12px, 1vw, 13.5px);
+	font-size: clamp(12px, 1cqw, 13.5px);
 }
 
 .loader-status {
@@ -252,7 +254,7 @@ body {
 	max-height: 0;
 	overflow: hidden;
 	opacity: 0;
-	font-size: clamp(11px, 0.9vw, 12.5px);
+	font-size: clamp(11px, 0.9cqw, 12.5px);
 	line-height: 1.5;
 	color: var(--tw-ink-3);
 	transition: opacity 600ms var(--tw-ease), max-height 600ms var(--tw-ease);
@@ -293,7 +295,7 @@ body {
 	padding: calc(3 * var(--tw-u)) calc(7 * var(--tw-u));
 	border: 1px solid rgba(var(--tw-aqua-rgb), 0.45);
 	border-radius: calc(4 * var(--tw-u));
-	font-size: clamp(9.5px, 0.8vw, 11px);
+	font-size: clamp(9.5px, 0.8cqw, 11px);
 	font-weight: 600;
 	letter-spacing: 0.16em;
 	text-transform: uppercase;
@@ -309,7 +311,7 @@ body {
 .loader-tip {
 	grid-area: 1 / 1;
 	margin: 0;
-	font-size: clamp(12.5px, 1.05vw, 14.5px);
+	font-size: clamp(12.5px, 1.05cqw, 14.5px);
 	line-height: 1.5;
 	color: var(--tw-ink-2);
 	opacity: 0;
@@ -382,7 +384,7 @@ body {
 /* ── root & primitives ─────────────────────────────────────────────────── */
 
 .tw-root {
-	position: fixed;
+	position: absolute;
 	inset: 0;
 	z-index: 100;
 	pointer-events: none;
@@ -698,14 +700,14 @@ body {
 	align-items: center;
 	gap: var(--tw-2);
 	width: max-content;
-	max-width: min(86vw, calc(520 * var(--tw-u)));
+	max-width: min(86cqw, calc(520 * var(--tw-u)));
 	transform: translateX(-50%);
 	transition: left var(--tw-slow) var(--tw-ease);
 }
 
 .tw-root[data-panel='open'] .tw-toasts {
 	left: calc(50% - (var(--tw-panel-w) + var(--tw-3)) / 2);
-	max-width: min(calc(100vw - var(--tw-panel-w) - 4 * var(--tw-4)), calc(520 * var(--tw-u)));
+	max-width: min(calc(100cqw - var(--tw-panel-w) - 4 * var(--tw-4)), calc(520 * var(--tw-u)));
 }
 
 .tw-toast {
@@ -782,7 +784,7 @@ body {
 .tw-prompt {
 	position: absolute;
 	left: 50%;
-	bottom: max(calc(72 * var(--tw-u)), 13vh);
+	bottom: max(calc(72 * var(--tw-u)), 13cqh);
 	display: flex;
 	align-items: center;
 	gap: calc(10 * var(--tw-u));
@@ -1174,7 +1176,7 @@ body {
 	display: flex;
 	flex-direction: column;
 	width: var(--tw-panel-w);
-	max-width: calc(100vw - 2 * var(--tw-3));
+	max-width: calc(100cqw - 2 * var(--tw-3));
 	overflow: hidden;
 	border-radius: var(--tw-r-lg);
 	opacity: 0;
@@ -1894,9 +1896,9 @@ body {
 }
 
 .tw-menu {
-	position: fixed;
+	position: absolute;
 	z-index: 40;
-	max-height: min(50vh, calc(320 * var(--tw-u)));
+	max-height: min(50cqh, calc(320 * var(--tw-u)));
 	padding: calc(4 * var(--tw-u));
 	overflow-y: auto;
 	border: 1px solid var(--tw-line-2);
@@ -2291,7 +2293,7 @@ body {
 /* ── tooltip ───────────────────────────────────────────────────────────── */
 
 .tw-tip {
-	position: fixed;
+	position: absolute;
 	top: 0;
 	left: 0;
 	z-index: 50;
@@ -2343,7 +2345,7 @@ body {
 
 .tw-help-card {
 	width: min(100%, calc(780 * var(--tw-u)));
-	max-height: calc(100vh - 2 * var(--tw-5));
+	max-height: calc(100cqh - 2 * var(--tw-5));
 	padding: calc(22 * var(--tw-u)) var(--tw-5) var(--tw-5);
 	overflow: auto;
 	border-radius: calc(18 * var(--tw-u));
@@ -2464,7 +2466,7 @@ body {
 
 .tw-start-title {
 	margin-right: -0.42em;
-	font-size: clamp(30px, 4.6vw, 64px);
+	font-size: clamp(30px, 4.6cqw, 64px);
 	font-weight: 600;
 	letter-spacing: 0.42em;
 	line-height: 1.05;
@@ -2608,3 +2610,9 @@ body {
 	}
 
 }
+
+:host { display:block; width:100%; height:100%; min-height:610px; }
+.tidewater-container { min-height:610px; }
+.resume { position:absolute; inset:0; z-index:1100; display:grid; place-items:center; background:#07131db8; }
+.resume[hidden] { display:none; }
+.resume button { font:700 18px system-ui,sans-serif; padding:14px 24px; border:0; border-radius:999px; background:#f5c86a; color:#14212a; cursor:pointer; }

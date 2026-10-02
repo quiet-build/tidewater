@@ -1,3 +1,4 @@
+import { assetBase } from '../../assets.js';
 import * as THREE from '../../engine/index.js';
 import { Material } from '../../engine/render/Material.js';
 import { ShaderModule } from '../../engine/gpu/Shader.js';
@@ -37,7 +38,7 @@ const _t = new THREE.Vector3();
 
 export class Whale {
 
-	constructor( { scene, terrain, query = null, spray = null, url = ( ( import.meta.env && import.meta.env.BASE_URL ) || '/' ) + 'models/whale/' } ) {
+	constructor( { scene, terrain, query = null, spray = null, url = assetBase + 'models/whale/' } ) {
 
 		this.scene = scene;
 		this.terrain = terrain;

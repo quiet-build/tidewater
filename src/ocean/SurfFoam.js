@@ -507,3 +507,5 @@ fn surfFoamLight( info: SurfFoamInfo, N: vec3f, L: vec3f, V: vec3f, sun: vec3f, 
 	}
 
 }
+
+export function clearSurfFoam() { cachedLace = null; }

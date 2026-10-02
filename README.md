@@ -153,9 +153,17 @@ requires the repository secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_I
 production releases run through GitHub Actions only. This fork does not deploy
 to GitHub Pages.
 
-The Mini Arcade portal loads `public/component.js`, which registers
-`pma-tidewater` and embeds the standalone game in a same-origin iframe with host
-pause/resume support. See [the source and release record](SOURCE_REVIEW.md).
+The standalone page and Mini Arcade both load the native `pma-tidewater`
+component built from `src/component.js`. It mounts the complete game in Shadow
+DOM, scopes input and sizing to its container, and releases WebGPU/audio/input
+on removal. There is no iframe. The main site uses fresh local saves; saves at
+the original Worker origin remain there without migration or deletion.
+See [the source and release record](SOURCE_REVIEW.md).
+
+For lifecycle checks, run `npm run dev` and open `/test/component.html`: mount,
+remove during loading, mount again, start with real input, and resize. The error
+panel preserves the first WebGPU failures. `/test/loader.html` and
+`/test/game-hud.html` remain scoped UI review pages.
 
 ## Project layout
 

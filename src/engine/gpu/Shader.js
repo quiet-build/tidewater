@@ -493,7 +493,7 @@ export function group0( stage ) {
 }
 
 // group 0 for another view's frame block (same layout, own buffer)
-const _viewGroups = new WeakMap();
+let _viewGroups = new WeakMap();
 export function group0ForBlock( block, stage = 'render' ) {
 
 	if ( block === _frameBlock ) return group0( stage );
@@ -675,3 +675,10 @@ export function createShaderModule( code, label ) {
 }
 
 export { UniformBlock };
+
+export function clearShaderCache() {
+	_layoutCache.clear();
+	_moduleCache.clear();
+	_group0 = null;
+	_viewGroups = new WeakMap();
+}
