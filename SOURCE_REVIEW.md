@@ -43,11 +43,17 @@ page remains usable at the old origin with those saves.
   remounted canvas accepted R input and retained no WebGPU validation errors.
 - Real browser input on the local production host: start, canvas clicks, W/R,
   outside pause, Resume, and returning to the canvas no longer repeat Resume.
+- Production: game commit `9328844`, [CI 37021445667](https://github.com/quiet-build/tidewater/actions/runs/37021445667);
+  portal commit `d644a43`, [CI 37021821179](https://github.com/quiet-build/mini-arcade-landing/actions/runs/37021821179).
+  Fresh production launch and real clicks/W/R confirmed the same start and
+  pause/resume sequence without repeated pauses. Shadow DOM contains no iframe;
+  browser console has no errors. Published component bytes match the build.
 - `pma-ready` means the loading UI is mounted; shader compilation continues with
   visible progress. Playability is checked separately using Click to explore.
 
-Headless Chromium does not establish playable WebGPU rendering quality. The
-standalone game was separately opened for human local play before publication.
+Full fishing/selling/upgrading progression and mobile performance still need
+player acceptance. Fullscreen remains unverified: even a separate minimal
+fullscreen test returns `TypeError: not granted` in the automation browser.
 
 ## Native component source review (2026-10-03)
 
@@ -55,7 +61,7 @@ Player problem: clicking the iframe canvas blurs the portal window and repeatedl
 triggers host pause. Reviewed local `quiet-build/voxel-garden` revision `4db6494`,
 `src/component.tsx`: a Shadow DOM mount, composed readiness event, pause method and
 disconnect cleanup. Adapt that lifecycle pattern to Tidewater's existing custom
-WebGPU engine; no engine or asset replacement. Standalone and portal will mount
+WebGPU engine; no engine or asset replacement. Standalone and portal mount
 the same component. User approved fresh main-site saves; old-domain saves stay
 on their original origin without import or deletion. Acceptance: real canvas
 start/movement, outside pause/resume, scoped controls, resize/fullscreen and remount.
